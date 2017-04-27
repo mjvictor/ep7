@@ -10,20 +10,33 @@ import java.util.Iterator;
 public class Board {   
     private int[][] board;
     private int n;
+    private int manhattan;
     // construct a board from an N-by-N array of tile
     // (where tiles[i][j] = tile at row i, column j)
     public Board(int[][] tiles) {
-        n = tiles.length;
+        int row, col;
+        manhattan = 0;
+        n = tiles.length; 
         board = new int[n][n];
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles.length; j++) {
                 board[i][j] = tiles[i][j];
+                //calcula o manhattan
+                 if (board[i][j] != 0 && board[i][j] != idealPosition(i, j)) {
+                    row = (board[i][j] - 1)/n;
+                    col = (board[i][j] - 1)%n;
+                    row = Math.abs(row - i);
+                    col = Math.abs(col - j);
+                    manhattan += (row + col);
+                }
             }
         }
     }
 
     // return tile at row i, column j (or 0 if blank)
     public int tileAt(int i, int j) {
+        if (i < 0 && i > n - 1 && j < 0 && j > n - 1) 
+            throw new java.lang.IndexOutOfBoundsException("arguments to tileAt() is out of bounds");
         return board[i][j];
     }
     // board size N
@@ -43,27 +56,14 @@ public class Board {
     }   
     // sum of Manhattan distances between tiles and goal                    
     public int manhattan() {
-        int count, row, col;
-        count = 0;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (board[i][j] != 0 && board[i][j] != idealPosition(i, j)) {
-                    row = (board[i][j] - 1)/n;
-                    col = (board[i][j] - 1)%n;
-                    row = Math.abs(row - i);
-                    col = Math.abs(col - j);
-                    count += (row + col);
-                }
-            }
-        }
-        return count;
+        return manhattan;
     }   
     // is this board the goal board?                  
     public boolean isGoal() {
         for (int i = 0; i < n; i++){
             for (int j = 0; j < n; j++) {
                 if (i < n-1 || j < n-1) {
-                    if (board[i][j] != 0 && board[i][j] != idealPosition(i, j))
+                    if (board[i][j] == 0 || board[i][j] != idealPosition(i, j))
                         return false;
                 }
             }
@@ -80,6 +80,7 @@ public class Board {
                     if (board[i][j] == 0) flag = 1;
                 }
             }
+            i--;
             inv = inversions();
             if ((i+inv) % 2 == 0) return false;
         }
@@ -176,14 +177,14 @@ public class Board {
         int i, j, count, ind;
         ind = 0;
         count = 0;
-        inv = new int[n*n];
+        inv = new int[(n*n)- 1];
         for (i = 0; i < n; i++) {
             for (j = 0; j < n; j++) {
                 if (board[i][j] != 0) inv[ind++] = board[i][j];
             }
         }
-        for (i = 0; i < n; i++) {
-            for (j = i + 1; j < n; j++){
+        for (i = 0; i < (n*n - 1); i++) {
+            for (j = i + 1; j < (n*n - 1); j++){
                 if (inv[i] > inv[j]) count++;
             }
         }
@@ -259,8 +260,7 @@ public class Board {
         }
 
         //formato do print
-        out = board.toString();
         StdOut.println(tiles1.length);
-        StdOut.println(out); 
+        StdOut.println(board.toString()); 
     }
 }
